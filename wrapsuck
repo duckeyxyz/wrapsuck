@@ -1,0 +1,71 @@
+#!/bin/sh
+#
+# Tiny wrapper script for suckless tools
+# By : Gerson Wahyudi <gersonwahyudi.2006@gmail.com>
+# TODO : Add option for sudo
+
+
+set -e
+
+# Program name
+PROGNAME=$(basename "$0")
+
+# Print help message
+usage() {
+    echo "Usage: ${PROGNAME} [OPTIONS]"
+    echo
+    echo "Options:"
+    echo "-s    sync and compile the programs"
+    echo "-h    show this help message"
+    echo
+    exit 0
+}
+
+# Check directory
+checkdir() {
+    SUCKLESS_DIR="/home/gerson/.config"
+    if [ ! -d "$SUCKLESS_DIR" ]; then
+        echo "Base suckless directory isn't found"
+        exit 0
+    fi
+}   
+
+
+# Compile function
+compilesuckless() {
+    ROOTCMD="doas"
+    $ROOTCMD make -C $SUCKLESS_DIR/dwm clean install >/dev/null | echo "Compiling dwm"
+    $ROOTCMD make -C $SUCKLESS_DIR/dmenu clean install >/dev/null | echo "Compiling dmenu.."
+    $ROOTCMD make -C $SUCKLESS_DIR/st clean install >/dev/null | echo "Compiling st.."
+    $ROOTCMD make -C $SUCKLESS_DIR/slstatus clean install >/dev/null | echo "Compiling slstatus.."
+    $ROOTCMD make -C $SUCKLESS_DIR/tabbed clean install >/dev/null | echo "Compiling tabbed.."
+    echo "Finished coompiling"
+}
+
+# Set both usage to be null
+USAGE_S=""
+USAGE_H=""
+
+# Case options
+while getopts ":sh:" opt; do
+    case "${opt}" in
+        s)
+            checkdir
+            compilesuckless
+            ;;
+        h)
+            usage
+            ;;
+		\?)
+			echo "${PROGNAME}: unknown option -${OPTARG}"
+			exit 1
+			;;
+    esac
+done
+
+user_input=$*
+
+# If no keywords passed then show usage message
+if [ -z "${user_input}" ]; then
+	usage
+fi
